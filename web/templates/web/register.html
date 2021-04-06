@@ -11,7 +11,7 @@
     <div class="account">
     <div class="title">用户注册</div>
     <br />
-    <form class="form-horizontal" method="post" novalidate>
+    <form class="form-horizontal" method="post" id="regForm" novalidate>
     {% csrf_token %}
         {% for field in form %}
             {% if field.name == 'verify_code' %}
@@ -34,7 +34,7 @@
           {% endfor %}
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
-                  <button type="submit" id="btnSubmit" class="btn btn-primary">注册</button>
+                  <button type="button" id="btnSubmit" class="btn btn-primary">注册</button>
                 </div>
             </div>
     </form>
@@ -91,7 +91,62 @@
 
             // 用户注册
             $('#btnSubmit').click(function (){
+                $('.error-msg').empty();
+
                // 获取用户数据，简单校验后发送到后台
+                /*
+                var csrf = $('input[name=csrfmiddlewaretoken]').val();
+                var username = $('#id_username').val();
+                var email = $('#id_email').val();
+                var mobile_phone =  $('#id_mobile_phone').val();
+                var password = $('#id_password').val();
+                var confirm_password = $('#id_confirm_password').val();
+                var verify_code = $('#id_verify_code').val();
+                */
+                /*
+                // 简单数据校验
+                if (username.length === 0 && email.length === 0 && verify_code.length === 0){
+                    return;
+                }
+
+                // 密码校验
+                if (password !== confirm_password){
+                    $('#id_confirm_password').next().text('密码不一致');
+                    return;
+                }
+                */
+                /*
+                params = {
+                        'csrfmiddlewaretoken': csrf,
+                        'username': username,
+                        'email': email,
+                        'mobile_phone': mobile_phone,
+                        'password': password,
+                        'confirm_password': confirm_password,
+                        'verify_code': verify_code
+                };
+                */
+
+                <!--一次获取所有的input内容, 包括CSRF-->
+                params = $('#regForm').serialize();
+                $.ajax({
+                    url: "{% url 'web:register' %}",
+                    type: 'post',
+                    data: params,
+                    dataType: 'json'
+                }).done(function (data){
+                    if (data.code === 200){
+                        location.href = data.msg;
+                    }else{
+                         $.each(data.msg, function (key, value){
+                             console.log(key+"-----"+value);
+                            $('#id_' + key).next().text(value[0])
+                         });
+                    }
+                }).fail(function (){
+                    console.log("网络超时");
+                })
+
             });
         });
     </script>

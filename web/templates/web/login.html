@@ -1,0 +1,62 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+
+{% block title %}用户登录{% endblock title %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/account.css' %}">
+{% endblock css %}
+
+{% block content %}
+    <div class="account">
+    <div class="title">用户登录</div>
+    <br />
+    <form class="form-horizontal" method="post" id="smsForm">
+    {% csrf_token %}
+        {% for field in form %}
+            {% if field.name == 'verify_code' %}
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    <div class="col-sm-10">
+                        <div class="col-sm-6" style="padding-left: 0">
+                            {{ field }}
+                            <span class="error-msg">{{ field.errors.0 }}</span>
+                        </div>
+                        <div class="col-sm-6"><img src="{% url 'web:image_code' %}" id="imageCode" title="点击更换图片" alt="验证码" /></div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="form-group">
+                <label class="col-sm-2 control-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <div class="col-sm-10">
+                    {{ field }}
+                    <span class="error-msg">{{ field.errors.0 }}</span>
+                </div>
+            </div>
+            {% endif %}
+          {% endfor %}
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                  <button type="submit" id="btnSubmit" class="btn btn-primary">登  录</button>
+                    <div style="float: right">
+                        <a href="{% url 'web:login_sms' %}">短信验证码登录？</a>
+                    </div>
+                </div>
+            </div>
+    </form>
+    </div>
+{% endblock content %}
+
+{% block js %}
+    <script type="text/javascript">
+
+        // 在事件中直接点击image的内容，在末尾加上？ 从而实现重新加载验证码
+        $(function (){
+            $('#imageCode').click(function (){
+               var oldSrc = $(this).attr('src');
+               $(this).attr('src', oldSrc+"?");
+            });
+        })
+    </script>
+{% endblock js %}

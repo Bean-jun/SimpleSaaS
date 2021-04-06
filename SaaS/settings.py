@@ -49,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'web.middlewares.auth.AuthMiddleware',  # 用户登录验证
 ]
 
 ROOT_URLCONF = 'SaaS.urls'
