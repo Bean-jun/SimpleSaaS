@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'app01.apps.App01Config',
+    'web.apps.WebConfig',
 ]
 
 MIDDLEWARE = [
@@ -118,3 +120,40 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+# 静态文件目录
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
+
+
+###### sms短信验证 ######
+TENCENT_APP_ID = 666666 # 自己应用ID
+TENCENT_APP_KEY = "66666666"  # 自己应用Key
+TENCENT_SMS_SIGN = "66666"  # 自己腾讯云创建签名时填写的签名内容（使用公众号的话这个值一般是公众号全称或简称）
+
+# 邮件激活类型
+TEMPLATE_ID = {
+    'login': 914045,
+    'register': 914010
+}
+
+# CACHE缓存
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": {
+                "max_connections": 1000,
+                "encoding": 'utf-8'
+            },
+        }
+    }
+}
+
+
+try:
+    from local_settings import *
+except NotImplementedError:
+    pass
