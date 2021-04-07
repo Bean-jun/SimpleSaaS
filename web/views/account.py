@@ -26,6 +26,25 @@ def register(request):
         if form.is_valid():
             # 保存数据, 但是数据密码是明文，需要在钩子中处理
             form.save()
+            # 注册用户直接给用户添加个人免费版的权限
+            username = form.cleaned_data['username']
+            user = models.UserInfo.objects.filter(username=username).first()
+
+            # 添加免费版权限
+            from datetime import datetime, timedelta
+            # 获取产品
+            price_policy = models.PricePolicy.objects.filter(category=1).first()
+
+            # 添加权限
+            start_time = datetime.now()
+            models.Transaction.objects.create(status=1,
+                                              user=user,
+                                              price_policy=price_policy,
+                                              pay_price=price_policy.price,
+                                              count=0,
+                                              start_time=start_time,
+                                              end_time=start_time + timedelta(days=365*999),
+                                              create_time=start_time)
 
             # 保存数据
             # data = form.cleaned_data
