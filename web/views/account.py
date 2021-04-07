@@ -1,3 +1,5 @@
+import uuid
+
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -25,25 +27,29 @@ def register(request):
 
         if form.is_valid():
             # 保存数据, 但是数据密码是明文，需要在钩子中处理
-            form.save()
+
+            # form.save()保存模型内容时，会返回一个当前对象
+            instance = form.save()
+
+            # -------------使用instance之后，这部分可以丢弃-----------
             # 注册用户直接给用户添加个人免费版的权限
-            username = form.cleaned_data['username']
-            user = models.UserInfo.objects.filter(username=username).first()
+            # username = form.cleaned_data['username']
+            # user = models.UserInfo.objects.filter(username=username).first()
 
             # 添加免费版权限
-            from datetime import datetime, timedelta
-            # 获取产品
+            from datetime import datetime
+            # 获取产品价格策略
             price_policy = models.PricePolicy.objects.filter(category=1).first()
-
-            # 添加权限
+            
+            # 添加权限交易记录
             start_time = datetime.now()
-            models.Transaction.objects.create(status=1,
-                                              user=user,
+            models.Transaction.objects.create(status=2,
+                                              user=instance,
                                               price_policy=price_policy,
-                                              pay_price=price_policy.price,
+                                              pay_price=0,
                                               count=0,
                                               start_time=start_time,
-                                              end_time=start_time + timedelta(days=365*999),
+                                              order=str(uuid.uuid4()),  # 产生随机字符串
                                               create_time=start_time)
 
             # 保存数据

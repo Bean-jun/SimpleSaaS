@@ -1,10 +1,13 @@
 from django.urls import path
-from web.views import account, home
+from web.views import account, home, project
 
 app_name = 'web'
 
 urlpatterns = [
     path('index/', home.index, name='index'),      # 首页
+
+    # 项目管理
+    path('project/list/', project.project_list, name='project_list'),   # 项目管理页
 
     # account 账户管理模块相关链接
     path('register/', account.register, name='register'),    # 用户注册

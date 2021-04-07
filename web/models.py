@@ -37,8 +37,8 @@ class Transaction(models.Model):
     price_policy = models.ForeignKey("PricePolicy", on_delete=models.CASCADE, verbose_name="价格策略")
     count = models.IntegerField(verbose_name="产品数量(年)", help_text="0表示无期限")
     pay_price = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="支付价格")
-    start_time = models.DateTimeField(auto_now_add=True, null=True, verbose_name="开始时间")
-    end_time = models.DateTimeField(auto_now=True, null=True, verbose_name="结束时间")
+    start_time = models.DateTimeField(null=True,blank=True, verbose_name="开始时间")
+    end_time = models.DateTimeField(null=True, blank=True, verbose_name="结束时间")
     order = models.CharField(max_length=64, unique=True, verbose_name="订单号")
     create_time = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
 
