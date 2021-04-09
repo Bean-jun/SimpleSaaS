@@ -55,7 +55,7 @@ class Project(models.Model):
     )
     name = models.CharField(max_length=64, verbose_name="项目名称")
     desc = models.CharField(max_length=256, null=True, blank=True, verbose_name="描述")
-    color = models.SmallIntegerField(choices=COLOR_CHOICES, verbose_name="颜色")
+    color = models.SmallIntegerField(choices=COLOR_CHOICES, verbose_name="颜色", default=1)
     star = models.BooleanField(default=False, verbose_name="星标")
     use_space = models.IntegerField(default=0, verbose_name="使用空间")
 

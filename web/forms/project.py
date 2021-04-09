@@ -2,17 +2,25 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from web.forms import bootstrap
+from web.forms.widgets import ColorRadioSelect
 from web import models
 
 
 class ProjectForm(bootstrap.BootStrapForm, forms.ModelForm):
     # 这样可以修改desc的属性，不过在下面直接写widgets也可以的
     # desc = forms.CharField(widget=forms.Textarea)
+
+    # 添加此内容，可以让BootStrapForm剔除这部分内容
+    bootstrap_class_exclude = ['color']
+
     class Meta:
         model = models.Project
         fields = ['name', 'color', 'desc']
         widgets = {
             'desc': forms.Textarea,
+            'color': ColorRadioSelect(
+                attrs={'class': 'color-radio'}
+            ),  # 自定义Radio插件
         }
 
     def __init__(self, request, *args, **kwargs):
