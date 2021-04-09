@@ -37,7 +37,7 @@ def project_list(request):
         create_project_list = models.Project.objects.filter(create_user=request.tracer.user)
         for row in create_project_list:
             if row.star:
-                project_dict['star'].append(row)
+                project_dict['star'].append({'value': row, 'type': 'create'})
             else:
                 project_dict['create'].append(row)
 
@@ -45,7 +45,7 @@ def project_list(request):
         join_project_list = models.ProjectUser.objects.filter(user=request.tracer.user)
         for item in join_project_list:
             if item.star:
-                project_dict['star'].append(item.project)
+                project_dict['star'].append({'value': item.project, 'type': 'join'})
             else:
                 project_dict['join'].append(item.project)
 
@@ -66,3 +66,29 @@ def project_list(request):
             return JsonResponse({"code": 200, "msg": 'ok'})
 
         return JsonResponse({"code": 406, "msg": form.errors})
+
+
+def project_star(request, project_type, project_id):
+
+    if project_type == 'user_create':
+        # 用户创建项目添加星标
+        models.Project.objects.filter(id=project_id, create_user=request.tracer.user).update(star=True)
+
+    if project_type == 'user_join':
+        # 用户加入项目添加星标
+        models.ProjectUser.objects.filter(project_id=project_id, user=request.tracer.user).update(star=True)
+
+    return redirect(reverse('web:project_list'))
+
+
+def project_unstar(request, project_type, project_id):
+
+    if project_type == 'create':
+        # 用户创建项目取消星标
+        models.Project.objects.filter(id=project_id, create_user=request.tracer.user).update(star=False)
+
+    if project_type == 'join':
+        # 用户加入项目取消星标
+        models.ProjectUser.objects.filter(project_id=project_id, user=request.tracer.user).update(star=False)
+
+    return redirect(reverse('web:project_list'))

@@ -104,17 +104,17 @@
               {% for item in project_dict.star %}
                   <div class="item">
                         <a href="#" class="title"
-                           style="background-color: {{ item.get_color_display }};">{{ item.name }}</a>
+                           style="background-color: {{ item.value.get_color_display }};">{{ item.value.name }}</a>
                         <div class="info">
                             <div>
-                                <a href="#">
+                                <a href="{% url 'web:project_unstar' project_type=item.type project_id=item.value.id %}">
                                     <i class="fa fa-star" aria-hidden="true" style="color: #f0ad4e;"></i>
                                 </a>
-                                <span>{{ item.create_user.username }}</span>
+                                <span>{{ item.value.create_user.username }}</span>
                             </div>
                             <div>
                                 <i class="fa fa-user-o" aria-hidden="true"></i>
-                                <span>{{ item.join_count }}</span>
+                                <span>{{ item.value.join_count }}</span>
                             </div>
                         </div>
                     </div>
@@ -133,7 +133,7 @@
                            style="background-color: {{ item.get_color_display }};">{{ item.name }}</a>
                         <div class="info">
                             <div>
-                                <a href="#">
+                                <a href="{% url 'web:project_star' project_type='user_create' project_id=item.id %}">
                                     <i class="fa fa-star" aria-hidden="true" style="color: #7b7b77;"></i>
                                 </a>
                                 <span>{{ item.create_user.username }}</span>
@@ -159,7 +159,7 @@
                            style="background-color: {{ item.get_color_display }};">{{ item.name }}</a>
                         <div class="info">
                             <div>
-                                <a href="#">
+                                <a href="{% url 'web:project_star' project_type='user_join' project_id=item.id %}">
                                     <i class="fa fa-star" aria-hidden="true" style="color: #7b7b77;"></i>
                                 </a>
                                 <span>{{ item.create_user.username }}</span>
