@@ -13,6 +13,7 @@ class Tracer:
     def __init__(self):
         self.user = None
         self.price_policy = None
+        self.project = None # 将项目进行封装
 
 
 class AuthMiddleware(MiddlewareMixin):
@@ -54,3 +55,31 @@ class AuthMiddleware(MiddlewareMixin):
             _object = models.Transaction.objects.filter(user=user_obj, status=2, price_policy__category=1).first()
 
         request.tracer.price_policy = _object.price_policy
+
+
+    def process_view(self, request, view, args, kwargs):
+        """
+        判断URL是否以manage开头
+            若是判断项目ID是否为当前用户创建或者参与
+        """
+
+        # 项目路径
+        if not request.path.startswith('/manage/'):
+            return
+
+        # 项目ID
+        project_id = kwargs.get('project_id')
+
+        # 判断是否为我创建或者我参加的
+        project_obj = models.Project.objects.filter(create_user=request.tracer.user,id=project_id).first()
+        if project_obj:
+            request.tracer.project = project_obj
+            return
+
+        project_user_obj = models.ProjectUser.objects.filter(user=request.tracer.user,id=project_id).first()
+        if project_user_obj:
+            request.tracer.project = project_user_obj.project
+            return
+
+        # 若是都不满足，重定向到项目管理页面
+        return redirect(reverse('web:project_list'))

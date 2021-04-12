@@ -36,9 +36,17 @@
         </div>
 
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
 
-        {#   inclusion实现     #}
-          {% all_project_list request %}
+            {#   inclusion实现     #}
+              {% all_project_list request %}
+
+            {# 判断是否进入项目了 #}
+            {% if request.tracer.project %}
+                {% manage_menu_list request %}
+            {% endif %}
+        </ul>
+
 
           <ul class="nav navbar-nav navbar-right">
               {% if request.tracer.user %}
