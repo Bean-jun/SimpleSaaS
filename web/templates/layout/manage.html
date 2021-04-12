@@ -1,4 +1,5 @@
 {% load static %}
+{% load project %}
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -7,8 +8,13 @@
     <link rel="stylesheet" href="{% static 'plugin/bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'plugin/font-awesome/css/font-awesome.min.css' %}">
     <style type="text/css">
-        .navbar-default{
+        .navbar-inverse{
             border-radius: 0;
+        }
+        .error-msg{
+            position: absolute;
+            font-size: 12px;
+            color: red;
         }
     </style>
     {% block css %}{% endblock css %}
@@ -16,8 +22,8 @@
 <body>
 
      <!--导航条-->
-    <nav class="navbar navbar-default">
-      <div class="container">
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
 
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
@@ -26,29 +32,34 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{% url 'web:index' %}">Tracer</a>
+          <a class="navbar-brand" href="{% url 'web:project_list' %}">Tracer</a>
         </div>
 
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-          <ul class="nav navbar-nav">
-            <li><a href="#">产品功能</a></li>
-            <li><a href="#">企业方案</a></li>
-            <li><a href="#">帮助文档</a></li>
-            <li><a href="#">价格</a></li>
-          </ul>
+        <ul class="nav navbar-nav">
+
+            {#   inclusion实现     #}
+              {% all_project_list request %}
+
+            {# 判断是否进入项目了 #}
+            {% if request.tracer.project %}
+                {% manage_menu_list request %}
+            {% endif %}
+        </ul>
+
 
           <ul class="nav navbar-nav navbar-right">
               {% if request.tracer.user %}
-{#                <li><a href="{% url 'web:login' %}">登 录</a></li>#}
-{#                <li><a href="{% url 'web:register' %}">注 册</a></li>#}
-
+                  <li><a href="#">工作台</a></li>
+                  <li><a href="#">日 历</a></li>
+                  <li><a href="#"><i class="fa fa-bell-o" aria-hidden="true"></i></a></li>
+                  <li><a href="#"><i class="fa fa-bookmark" aria-hidden="true"></i></a></li>
                 <li class="dropdown">
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                           {{ request.tracer.user.username }}
                           <span class="caret"></span></a>
                       <ul class="dropdown-menu">
-                        <li><a href="{% url 'web:project_list' %}">管理中心</a></li>
-{#                        <li><a href="#">个人资料</a></li>#}
+                        <li><a href="{% url 'web:index' %}">返回官网</a></li>
                         <li role="separator" class="divider"></li>
                         <li><a href="{% url 'web:logout' %}">退出</a></li>
                       </ul>

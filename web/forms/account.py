@@ -150,7 +150,7 @@ class SendSmsForm(forms.Form):
         # 数据验证成功，进行短信发送
         code = random.randrange(1000, 9999)
 
-        # 我是穷鬼 ，这里先注释掉
+        # todo:我是穷鬼 ，这里先注释掉
         # res = send_sms_single(phone_num=mobile_phone,
         #                       template_id=template_id,
         #                       template_param_list=[code,])
