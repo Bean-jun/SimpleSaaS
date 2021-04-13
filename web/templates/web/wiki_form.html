@@ -87,7 +87,7 @@
 {% endblock content %}
 {% block js %}
 
-    <script src="{% static 'plugin/editor-md/editormd.min.js' %}"></script>
+    <script src="{% static 'plugin/editor-md/editormd.js' %}"></script>
     <script type="text/javascript">
         var WIKI_DETAIL_URL = '{% url 'web:manage:wiki' request.tracer.project.id %}';
         var WIKI_UPLOAD_URL = '{% url 'web:manage:wiki_upload_img' request.tracer.project.id %}';
@@ -101,7 +101,7 @@
         // Markdown编辑器的初始化
         function initEditorMd(){
             {#editor是对应编辑页的ID，path是指Markdown文件的依赖其他文件#}
-            editored('editor', {
+            editormd('editor', {
                     placeholder: "请输入内容",
                     height: 400,
                     {#emoji: true,#}
