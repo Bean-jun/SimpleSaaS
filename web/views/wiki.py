@@ -1,9 +1,11 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 from web.forms.wiki import WikiModelForm
 from web import models
+from utils.encrypt import file_uid
 
 from utils.tencent.cos_upload import upload_file
 
@@ -87,10 +89,33 @@ def wiki_delete(request, project_id, wiki_id):
     return redirect(reverse('web:manage:wiki', kwargs={'project_id': project_id}))
 
 
-def wiki_upload_img(request, project_id, wiki_id):
+@csrf_exempt
+def wiki_upload_img(request, project_id):
     """wiki图片上传"""
-    print( 'ok')
-    client = upload_file(bucked=request.tracer.project.bucket, region=request.tracer.project.region)
-    client.upload_file_from_buffer(Bucket=request.tracer.project.bucket,
-                                   )
-    return None
+    context = {
+        # 上传成功success为1，url为上传成功后的返回链接，用于图片显示，message用于提示
+        "success": 0,
+        "message": None,
+        "url": None
+    }
+    # 图片内容
+    image_obj = request.FILES.get('editormd-image-file')
+
+    if not image_obj:
+        context['message'] = '文件不存在'
+        return JsonResponse(context)
+
+    # 图片名称
+    file_end = image_obj.name.rsplit('.')[-1]
+    key = '{}.{}'.format(file_uid(request.tracer.user.mobile_phone), file_end)
+
+    # 上传图片
+    context['url'] = upload_file(bucket=request.tracer.project.bucket,
+                                 key=key,
+                                 image_obj=image_obj,
+                                 region=request.tracer.project.region)
+
+    # 返回数据
+    context['success'] = 1
+
+    return JsonResponse(context)

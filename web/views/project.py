@@ -1,9 +1,11 @@
+import time
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
 from web import models
 from web.forms.project import ProjectForm
+from utils.tencent.cos_upload import create_bucket
 
 
 def project_list(request):
@@ -56,6 +58,12 @@ def project_list(request):
 
         if form.is_valid():
             # 验证成功： 数据库需要存储项目名，颜色，描述，创建者
+
+            # 为创建项目的用户创建桶
+            bucket = f"saas-{request.tracer.user.mobile_phone}-{int(100*time.time())}-1305490799"
+            create_bucket(bucket)
+            form.instance.bucket = bucket
+            form.instance.region = 'ap-shanghai'
 
             # form表单中没有create_user,需要手动添加
             form.instance.create_user = request.tracer.user
