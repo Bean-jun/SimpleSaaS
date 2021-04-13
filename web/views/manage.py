@@ -17,8 +17,7 @@ def file(request, project_id):
     return render(request, 'web/file.html')
 
 
-def wiki(request, project_id):
-    return render(request, 'web/wiki.html')
+
 
 
 def settings(request, project_id):

@@ -37,7 +37,7 @@ class Transaction(models.Model):
     price_policy = models.ForeignKey("PricePolicy", on_delete=models.CASCADE, verbose_name="价格策略")
     count = models.IntegerField(verbose_name="产品数量(年)", help_text="0表示无期限")
     pay_price = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="支付价格")
-    start_time = models.DateTimeField(null=True,blank=True, verbose_name="开始时间")
+    start_time = models.DateTimeField(null=True, blank=True, verbose_name="开始时间")
     end_time = models.DateTimeField(null=True, blank=True, verbose_name="结束时间")
     order = models.CharField(max_length=64, unique=True, verbose_name="订单号")
     create_time = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
@@ -63,6 +63,10 @@ class Project(models.Model):
     create_user = models.ForeignKey("UserInfo", on_delete=models.CASCADE, verbose_name="创建者")
     create_time = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
 
+    # 创建时添加文件存储桶及地域
+    bucket = models.CharField(max_length=128, verbose_name="桶名称")
+    region = models.CharField(max_length=32, verbose_name="地域")
+
 
 class ProjectUser(models.Model):
     """项目参与者"""
@@ -70,3 +74,21 @@ class ProjectUser(models.Model):
     user = models.ForeignKey("UserInfo", on_delete=models.CASCADE, verbose_name="用户")
     star = models.BooleanField(default=False, verbose_name="星标")
     create_time = models.DateTimeField(auto_now_add=True, verbose_name="加入时间")
+
+
+# 自关联创建wiki表实现多级目录
+class Wiki(models.Model):
+    """Wiki模型"""
+    project = models.ForeignKey("Project", on_delete=models.CASCADE, verbose_name="项目")
+    title = models.CharField(max_length=32, verbose_name="标题")
+    content = models.TextField(verbose_name="内容")
+
+    # 自关联 related_name='children' 反向关联字段
+    parent = models.ForeignKey("Wiki", on_delete=models.CASCADE, null=True, blank=True, verbose_name="父文章",
+                               related_name='children')
+
+    # 解决wiki的顺序问题，避免前端显示因先读取子目录导致内容无法显示
+    depth = models.IntegerField(verbose_name="深度")
+
+    def __str__(self):
+        return self.title

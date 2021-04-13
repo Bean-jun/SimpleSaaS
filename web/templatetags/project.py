@@ -16,7 +16,7 @@ def all_project_list(request):
     # 获取自己参见的所有项目
     join_project_list = models.ProjectUser.objects.filter(user=request.tracer.user)
 
-    return {'create': create_project_list, 'join': join_project_list}
+    return {'create': create_project_list, 'join': join_project_list, 'request': request}
 
 
 # 项目菜单 -- 设置默认选中[就是为了加这一个功能]🤡😅
