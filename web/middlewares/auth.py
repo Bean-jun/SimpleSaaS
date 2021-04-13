@@ -10,10 +10,11 @@ from web import models
 
 class Tracer:
     """封装user和price_policy的数据，便于视图函数访问"""
+
     def __init__(self):
         self.user = None
         self.price_policy = None
-        self.project = None # 将项目进行封装
+        self.project = None  # 将项目进行封装
 
 
 class AuthMiddleware(MiddlewareMixin):
@@ -56,7 +57,6 @@ class AuthMiddleware(MiddlewareMixin):
 
         request.tracer.price_policy = _object.price_policy
 
-
     def process_view(self, request, view, args, kwargs):
         """
         判断URL是否以manage开头
@@ -71,12 +71,12 @@ class AuthMiddleware(MiddlewareMixin):
         project_id = kwargs.get('project_id')
 
         # 判断是否为我创建或者我参加的
-        project_obj = models.Project.objects.filter(create_user=request.tracer.user,id=project_id).first()
+        project_obj = models.Project.objects.filter(create_user=request.tracer.user, id=project_id).first()
         if project_obj:
             request.tracer.project = project_obj
             return
 
-        project_user_obj = models.ProjectUser.objects.filter(user=request.tracer.user,id=project_id).first()
+        project_user_obj = models.ProjectUser.objects.filter(user=request.tracer.user, id=project_id).first()
         if project_user_obj:
             request.tracer.project = project_user_obj.project
             return

@@ -137,6 +137,10 @@ TEMPLATE_ID = {
     'register': 914010
 }
 
+# 腾讯云对象存储
+TENCENT_SECRET_ID = '用户 secret_id'
+TENCENT_SECRET_KEY = '用户 secret_key'
+
 # CACHE缓存
 CACHES = {
     "default": {
