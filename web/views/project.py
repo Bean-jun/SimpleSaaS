@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from web import models
 from web.forms.project import ProjectForm
-from utils.tencent.cos_upload import create_bucket
+from utils.tencent.cos import create_bucket
 
 
 def project_list(request):
