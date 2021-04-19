@@ -1,5 +1,8 @@
+import json
+
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 from web.forms.file import FileFolderModelForm
 from web.models import FileRepository
 from utils.tencent.cos import delete_file, delete_file_list
@@ -133,7 +136,32 @@ def file_delete(request, project_id):
             return JsonResponse({'code': 200})
 
 
+@csrf_exempt
 def cos_credentials(request, project_id):
     """获取文件上传凭证"""
+    # 文件大小限制
+    file_list = json.loads(request.body.decode('utf-8'))
+
+    # 单文件最大限制
+    single_file_max = request.tracer.price_policy.single_file_space * 1024 * 1024
+    # 项目总文件大小限制
+    count_file_max = request.tracer.price_policy.project_space * 1024 * 1024
+    # 当前总文件
+    total_size = 0
+
+    for item in file_list:
+        # 单文件限制
+        if item['size'] > single_file_max:
+            return JsonResponse({'msg': '单文件 {} 超出限制(最大{} M)'.format(item['name'],
+                                                                     request.tracer.price_policy.single_file_space),
+                                 'code': 416})
+        # 项目总文件限制
+        total_size += item['size']
+
+    if total_size + request.tracer.project.use_space > count_file_max:
+        return JsonResponse({'msg': '上传总文件超出限制(最大{} M)'
+                            .format(request.tracer.price_policy.single_file_space),
+                             'code': 416})
+
     data = credentials(request.tracer.project.bucket, request.tracer.project.region)
-    return JsonResponse(data)
+    return JsonResponse({'data': data, 'code': 200})

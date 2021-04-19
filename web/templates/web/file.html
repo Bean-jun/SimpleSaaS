@@ -32,6 +32,17 @@
             left: -2px;
             overflow: hidden;
         }
+
+        .upload-progress {
+            position: fixed;
+            right: 2px;
+            bottom: 2px;
+            width: 400px;
+        }
+
+        .progress-error {
+            color: red;
+        }
     </style>
 {% endblock css %}
 
@@ -174,6 +185,38 @@
             </div>
         </div>
 
+        <div id="uploadProgress" class="upload-progress hide">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <i class="fa fa-cloud-upload"></i> 上传进度
+                </div>
+                <div class="panel-body">
+                    <table class="table">
+                        <tbody id="progressList">
+                        <!--通过下方模板导入-->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hide">
+        <table id="progressTemplate">
+            <tr>
+                <td>
+                    <div class="name"></div>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="0"
+                             aria-valuemin="0"
+                             aria-valuemax="100" style="width: 0;">
+                            0
+                        </div>
+                    </div>
+                    <div class="progress-error"></div>
+                </td>
+            </tr>
+        </table>
     </div>
 {% endblock content %}
 
@@ -249,30 +292,54 @@
             $('#uploadFile').change(function () {
                 var filelist = $(this)[0].files;    // 获取到所有文件
 
-                // 初始化实例
+                // 每次上传都清空进度条
+                $('#progressList').empty();
+
+
+                // 获取每次上传的文件的大小及名称
+                var checkFileList = [];
+                $.each(filelist, function (index, fileObj) {
+                    checkFileList.push({'name': fileObj.name, 'size': fileObj.size})
+                });
+
+                // 初始化实例 -- 并对数据进行容量大小进行校验，没有问题就返回临时秘钥，否则返回错误信息
                 var cos = new COS({
                     getAuthorization: function (options, callback) {
-                        // 异步获取临时密钥
-                        $.get('{% url 'web:manage:cos_credentials' request.tracer.project.id %}', {
-                            {#bucket: options.Bucket,#}
-                            {#region: options.Region,#}
-                        }, function (data) {
-                            var credentials = data && data.credentials;
-                            if (!data || !credentials) return console.error('credentials invalid');
-                            callback({
-                                TmpSecretId: credentials.tmpSecretId,
-                                TmpSecretKey: credentials.tmpSecretKey,
-                                XCosSecurityToken: credentials.sessionToken,
-                                // 建议返回服务器时间作为签名的开始时间，避免用户浏览器本地时间偏差过大导致签名错误
-                                StartTime: data.startTime, // 时间戳，单位秒，如：1580000000
-                                ExpiredTime: data.expiredTime, // 时间戳，单位秒，如：1580000900
+                        // 异步获取临时密钥--同时校验数据
+                        $.post('{% url 'web:manage:cos_credentials' request.tracer.project.id %}',
+                            // post发送秦秋文件
+                            JSON.stringify(checkFileList)
+                            , function (data) {
+                                if (data.code === 200) {
+                                    var credentials = data.data && data.data.credentials;
+                                    if (!data.data || !credentials) return console.error('credentials invalid');
+                                    callback({
+                                        TmpSecretId: credentials.tmpSecretId,
+                                        TmpSecretKey: credentials.tmpSecretKey,
+                                        XCosSecurityToken: credentials.sessionToken,
+                                        // 建议返回服务器时间作为签名的开始时间，避免用户浏览器本地时间偏差过大导致签名错误
+                                        StartTime: data.data.startTime, // 时间戳，单位秒，如：1580000000
+                                        ExpiredTime: data.data.expiredTime, // 时间戳，单位秒，如：1580000900
+                                    });
+
+                                    // 授权成功，显示进度条
+                                    $('#uploadProgress').removeClass('hide')
+                                } else {
+                                    alert(data.msg);
+                                }
                             });
-                        });
                     }
                 });
 
                 $.each(filelist, function (index, fileObj) {
-                    console.log(fileObj.name);
+
+                    // 进度条处理 -- clone 表示将当前标签复制一份
+                    var $tr = $('#progressTemplate').find('tr').clone();
+                    $tr.find('.name').text(fileObj.name);
+
+                    // 添加到进度条中
+                    $('#progressList').append($tr);
+
                     // 上传文件
                     cos.putObject({
                         Bucket: '{{ request.tracer.project.bucket }}', /* 必须 */
@@ -281,7 +348,10 @@
                         StorageClass: 'STANDARD',
                         Body: fileObj, // 上传文件对象
                         onProgress: function (progressData) {
-                            console.log(JSON.stringify(progressData));
+                            {#var dataDict = JSON.stringify(progressData);#}
+                            var percent = progressData.percent * 100 + '%'
+                            $tr.find('.progress-bar').text(percent);
+                            $tr.find('.progress-bar').css({'width': percent});
                         }
                     }, function (err, data) {
                         console.log(err || data);
