@@ -87,15 +87,13 @@
                 </tr>
                 </thead>
 
-                <tbody>
+                <tbody id="rowList">
                 {% for item in file_obj_list %}
                     <tr>
                         <td>
                             {% if item.file_type == 1 %}
-                                <a href="{% url 'web:manage:file' request.tracer.project.id %}?folder={{ item.id }}">
-                                    <i class="fa fa-file" aria-hidden="true"></i>
-                                    {{ item.name }}
-                                </a>
+                                <i class="fa fa-file" aria-hidden="true"></i>
+                                {{ item.name }}
                             {% else %}
                                 <a href="{% url 'web:manage:file' request.tracer.project.id %}?folder={{ item.id }}">
                                     <i class="fa fa-folder" aria-hidden="true"></i>
@@ -107,7 +105,9 @@
 
                         <td>
                             {% if item.file_type == 1 %}
-                                {{ item.file_size }}
+                                {#                                {{ item.file_size }}#}
+                                {#                                MB显示#}
+                                {% widthratio item.file_size 1024 1 %} KB
                             {% else %}
                                 -
                             {% endif %}
@@ -218,12 +218,33 @@
             </tr>
         </table>
     </div>
+    <div class="hide">
+        <table id="rowTpl">
+            <tr>
+                <td>
+                    <i class="fa fa-file" aria-hidden="true"></i>
+                    <span class="name"></span>
+                </td>
+                <td class="file_size"></td>
+                <td class="update_user_username"></td>
+                <td class="update_datetime"></td>
+                <td>
+                    <a class="btn btn-default btn-xs delete" data-toggle="modal" data-target="#deletemodal">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </div>
 {% endblock content %}
 
 {% block js %}
     <script src="{% static 'js/cos-js-sdk-v5.min.js' %}"></script>
     <script>
         $(function () {
+            // 当前文件所在文件夹ID
+            var CURRENT_FOLDER_ID = '{{ folder_obj.id }}';
+
             // 删除文件夹
             $('#btnDelete').click(function () {
                 // 获取需要删除的ID
@@ -332,6 +353,8 @@
                 });
 
                 $.each(filelist, function (index, fileObj) {
+                    // 获取时间戳用于文件名
+                    var file_key = (new Date()).getTime() + '_' + fileObj.name;
 
                     // 进度条处理 -- clone 表示将当前标签复制一份
                     var $tr = $('#progressTemplate').find('tr').clone();
@@ -344,7 +367,7 @@
                     cos.putObject({
                         Bucket: '{{ request.tracer.project.bucket }}', /* 必须 */
                         Region: '{{ request.tracer.project.region }}',     /* 存储桶所在地域，必须字段 */
-                        Key: fileObj.name,              /* 必须 */
+                        Key: file_key,              /* 必须 */
                         StorageClass: 'STANDARD',
                         Body: fileObj, // 上传文件对象
                         onProgress: function (progressData) {
@@ -355,6 +378,35 @@
                         }
                     }, function (err, data) {
                         console.log(err || data);
+                        // 上传成功之后向后台发送数据并存储
+                        if (data && data.statusCode === 200) {
+                            // 上传成功 数据写入数据库
+                            $.post('{% url 'web:manage:file_post' request.tracer.project.id %}',
+                                // 文件名称name 文件大小file_size  文件在cos中存储的地址key 当前文件所在的文件夹地址parent
+                                {
+                                    'name': fileObj.name,
+                                    'file_size': fileObj.size,
+                                    'key': file_key,
+                                    'parent': CURRENT_FOLDER_ID,
+                                    'file_path': data.Location,
+                                },
+                                function (data) {
+                                    // 回调函数
+                                    var $newTr = $('#rowTpl').find('tr').clone();
+                                    $newTr.find('.name').text(data.msg.name);
+                                    $newTr.find('.file_size').text(data.msg.file_size);
+                                    $newTr.find('.update_user_username').text(data.msg.username);
+                                    $newTr.find('.update_datetime').text(data.msg.modify_datetime);
+                                    $newTr.find('.delete').attr('data-fid', data.msg.id);
+                                    $('#rowList').append($newTr);
+
+                                    // 清理进度条
+                                    $tr.remove();
+                                })
+                        } else {
+                            $tr.find('.progress-error').text("上传失败");
+                        }
+
                     });
                 });
             })

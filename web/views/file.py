@@ -3,7 +3,7 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from web.forms.file import FileFolderModelForm
+from web.forms.file import FileFolderModelForm, FileUploadModelForm
 from web.models import FileRepository
 from utils.tencent.cos import delete_file, delete_file_list
 from utils.tencent.cos import credentials
@@ -49,6 +49,7 @@ def file(request, project_id):
             'form': form,
             'file_obj_list': file_obj_list,
             'breadcrumb_list': breadcrumb_list,
+            'folder_obj': parent_obj,  # 当前所在目录对象
         }
         return render(request, 'web/file.html', context)
 
@@ -80,6 +81,7 @@ def file(request, project_id):
 
 
 def file_delete(request, project_id):
+    """文件&&文件夹的删除"""
     if request.method == "GET":
         # 获取文件ID
         fid = request.GET.get('fid', None)
@@ -165,3 +167,30 @@ def cos_credentials(request, project_id):
 
     data = credentials(request.tracer.project.bucket, request.tracer.project.region)
     return JsonResponse({'data': data, 'code': 200})
+
+
+@csrf_exempt
+def file_post(request, project_id):
+    """获取前端文件上传cos回调内容并写入数据库"""
+    form = FileUploadModelForm(request.POST)
+
+    if form.is_valid():
+        # 校验成功，写入数据库
+        data_dic = form.cleaned_data
+        data_dic.update({'project': request.tracer.project, 'file_type': 1, 'update_user': request.tracer.user})
+        instance = FileRepository.objects.create(**data_dic)
+
+        # 对当前项目空间进行更新
+        request.tracer.project.use_space += data_dic['file_size']
+        request.tracer.project.save()
+
+        context = {
+            'id': instance.id,
+            'name': instance.name,
+            'file_size': '{} KB'.format(instance.file_size // 1024),
+            'username': instance.update_user.username,
+            'modify_datetime': instance.modify_datetime.strftime('%Y年%m月%d日 %H:%M'),
+        }
+        return JsonResponse({'msg': context, 'code': 200})
+
+    return JsonResponse({'msg': "上传失败", 'code': 416})

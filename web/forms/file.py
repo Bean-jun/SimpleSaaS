@@ -35,3 +35,16 @@ class FileFolderModelForm(BootStrapForm, forms.ModelForm):
             raise ValidationError("文件夹已经存在")
 
         return name
+
+
+class FileUploadModelForm(forms.ModelForm):
+    """文件上传cos返回校验"""
+
+    class Meta:
+        model = FileRepository
+        fields = ['name', 'file_size', 'key', 'file_path', 'parent']
+
+    def clean_file_path(self):
+        file_path = self.cleaned_data['file_path']
+
+        return 'https:{}'.format(file_path)

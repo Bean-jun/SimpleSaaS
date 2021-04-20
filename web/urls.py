@@ -24,8 +24,11 @@ urlpatterns = [
             path('dashboard/', manage.dashboard, name='dashboard'),   # 项目概览
             path('issues/', manage.issues, name='issues'),   # 项目问题
             path('statistics/', manage.statistics, name='statistics'),   # 项目统计
+
+            # 文件路由
             path('file/', file.file, name='file'),   # 项目文件
             path('file/delete/', file.file_delete, name='file_delete'),   # 删除项目文件
+            path('file/post/', file.file_post, name='file_post'),   # 客户端文件上传写入服务端
             path('cos/cos_credentials/', file.cos_credentials, name='cos_credentials'),   # 项目文件上传授权
 
             # wiki路由

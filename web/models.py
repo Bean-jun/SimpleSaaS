@@ -21,7 +21,7 @@ class PricePolicy(models.Model):
     price = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="产品价格")
     create_project = models.IntegerField(verbose_name="项目数量")
     project_member = models.IntegerField(verbose_name="成员数量")
-    project_space = models.IntegerField(verbose_name="项目空间")
+    project_space = models.IntegerField(verbose_name="项目空间(M)")
     single_file_space = models.IntegerField(verbose_name="单文件空间(M)")
     create_time = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
 
@@ -57,7 +57,7 @@ class Project(models.Model):
     desc = models.CharField(max_length=256, null=True, blank=True, verbose_name="描述")
     color = models.SmallIntegerField(choices=COLOR_CHOICES, verbose_name="颜色", default=1)
     star = models.BooleanField(default=False, verbose_name="星标")
-    use_space = models.IntegerField(default=0, verbose_name="使用空间")
+    use_space = models.BigIntegerField(default=0, verbose_name="使用空间(字节)")
 
     join_count = models.IntegerField(default=1, verbose_name="参与人数")
     create_user = models.ForeignKey("UserInfo", on_delete=models.CASCADE, verbose_name="创建者")
@@ -104,7 +104,7 @@ class FileRepository(models.Model):
     file_type = models.SmallIntegerField(choices=FILE_TYPE_CHOICES, verbose_name="文件类型")
     name = models.CharField(max_length=32, verbose_name='文件夹名', help_text='文件/文件夹')
     key = models.CharField(max_length=128, null=True, blank=True, verbose_name="存储在cos的key")
-    file_size = models.PositiveIntegerField(verbose_name='文件大小', null=True)
+    file_size = models.PositiveIntegerField(verbose_name='文件大小(字节)', null=True)
     file_path = models.CharField(max_length=255, null=True, blank=True, verbose_name="文件路径")
 
     parent = models.ForeignKey("FileRepository", on_delete=models.CASCADE, null=True, blank=True, verbose_name="父级目录",
