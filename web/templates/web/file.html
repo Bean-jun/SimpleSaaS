@@ -123,6 +123,10 @@
                                    data-fid="{{ item.id }}"
                                    data-whatever="编辑文件夹">
                                     <i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
+                            {% elif item.file_type == 1 %}
+                                <a class="btn btn-default btn-xs download" fid="{{ item.id }}">
+                                    <i class="fa fa-download" aria-hidden="true"></i>
+                                </a>
                             {% endif %}
                             <a>
                                 <a class="btn btn-default btn-xs"
@@ -229,6 +233,10 @@
                 <td class="update_user_username"></td>
                 <td class="update_datetime"></td>
                 <td>
+
+                    <a class="btn btn-default btn-xs download">
+                        <i class="fa fa-download" aria-hidden="true"></i>
+                    </a>
                     <a class="btn btn-default btn-xs delete" data-toggle="modal" data-target="#deletemodal">
                         <i class="fa fa-trash" aria-hidden="true"></i>
                     </a>
@@ -398,6 +406,8 @@
                                     $newTr.find('.update_user_username').text(data.msg.username);
                                     $newTr.find('.update_datetime').text(data.msg.modify_datetime);
                                     $newTr.find('.delete').attr('data-fid', data.msg.id);
+                                    // 给文件下载使用
+                                    $newTr.find('.download').attr('fid', data.msg.id);
                                     $('#rowList').append($newTr);
 
                                     // 清理进度条
@@ -409,7 +419,23 @@
 
                     });
                 });
-            })
+            });
+
+            // 文件下载
+            $('.download').click(function (){
+                fid = $(this).attr('fid')
+                $.get('{% url 'web:manage:file_download' request.tracer.project.id %}',
+                    {
+                        'fid': fid
+                    },
+                    function (data){
+                        if(data.code === 200){
+                            location.href = data.msg;
+                        }else{
+                            alert(data.msg);
+                        }
+                    });
+            });
         })
     </script>
 {% endblock js %}

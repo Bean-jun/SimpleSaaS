@@ -194,3 +194,20 @@ def file_post(request, project_id):
         return JsonResponse({'msg': context, 'code': 200})
 
     return JsonResponse({'msg': "上传失败", 'code': 416})
+
+
+def file_download(request, project_id):
+    fid = request.GET.get('fid', None)
+
+    if not fid:
+        return JsonResponse({'msg': '错误', 'code': 416})
+
+    try:
+        fid = int(fid)
+        file_obj = FileRepository.objects.filter(project=request.tracer.project,
+                                                 file_type=1,
+                                                 id=fid).first()
+    except Exception as e:
+        return JsonResponse({'msg': "资源不存在", 'code': 416})
+
+    return JsonResponse({'msg': file_obj.file_path, 'code': 200})

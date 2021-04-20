@@ -29,6 +29,7 @@ urlpatterns = [
             path('file/', file.file, name='file'),   # 项目文件
             path('file/delete/', file.file_delete, name='file_delete'),   # 删除项目文件
             path('file/post/', file.file_post, name='file_post'),   # 客户端文件上传写入服务端
+            path('file/download/', file.file_download, name='file_download'),   # 文件下载
             path('cos/cos_credentials/', file.cos_credentials, name='cos_credentials'),   # 项目文件上传授权
 
             # wiki路由
