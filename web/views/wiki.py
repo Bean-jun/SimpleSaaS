@@ -7,7 +7,7 @@ from web.forms.wiki import WikiModelForm
 from web import models
 from utils.encrypt import file_uid
 
-from utils.tencent.cos_upload import upload_file
+from utils.tencent.cos import upload_file
 
 
 def wiki(request, project_id):
