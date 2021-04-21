@@ -1,6 +1,7 @@
 import json
 
-from django.http import JsonResponse
+import requests
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from web.forms.file import FileFolderModelForm, FileUploadModelForm
@@ -197,10 +198,11 @@ def file_post(request, project_id):
 
 
 def file_download(request, project_id):
+    """文件下载"""
     fid = request.GET.get('fid', None)
 
     if not fid:
-        return JsonResponse({'msg': '错误', 'code': 416})
+        return HttpResponse("资源不存在")
 
     try:
         fid = int(fid)
@@ -208,6 +210,20 @@ def file_download(request, project_id):
                                                  file_type=1,
                                                  id=fid).first()
     except Exception as e:
-        return JsonResponse({'msg': "资源不存在", 'code': 416})
+        return HttpResponse("资源不存在")
 
-    return JsonResponse({'msg': file_obj.file_path, 'code': 200})
+    # 调整资源路径
+    file_path = '://'.join(file_obj.file_path.split(':'))
+
+    # iter_content()适应于分批量下载
+    res = requests.get(file_path)
+    data = res.iter_content()
+
+    # 中文名转义
+    from django.utils.encoding import escape_uri_path
+
+    response = HttpResponse(data)
+    # 设置请求头以便于下载而不是打开
+    response['Content-Disposition'] = "attachment;filename={};".format(escape_uri_path(file_obj.name))
+
+    return response

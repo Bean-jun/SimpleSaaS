@@ -124,7 +124,7 @@
                                    data-whatever="编辑文件夹">
                                     <i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
                             {% elif item.file_type == 1 %}
-                                <a class="btn btn-default btn-xs download" fid="{{ item.id }}">
+                                <a class="btn btn-default btn-xs download" href="{% url 'web:manage:file_download' request.tracer.project.id %}?fid={{ item.id }}">
                                     <i class="fa fa-download" aria-hidden="true"></i>
                                 </a>
                             {% endif %}
@@ -234,7 +234,7 @@
                 <td class="update_datetime"></td>
                 <td>
 
-                    <a class="btn btn-default btn-xs download">
+                    <a class="btn btn-default btn-xs download" href="{% url 'web:manage:file_download' request.tracer.project.id %}?fid=">
                         <i class="fa fa-download" aria-hidden="true"></i>
                     </a>
                     <a class="btn btn-default btn-xs delete" data-toggle="modal" data-target="#deletemodal">
@@ -406,10 +406,12 @@
                                     $newTr.find('.update_user_username').text(data.msg.username);
                                     $newTr.find('.update_datetime').text(data.msg.modify_datetime);
                                     $newTr.find('.delete').attr('data-fid', data.msg.id);
-                                    // 给文件下载使用
-                                    $newTr.find('.download').attr('fid', data.msg.id);
+                                    // 给文件下载使用  修复文件下载，不通过json进行返回
+                                    {#$newTr.find('.download').attr('fid', data.msg.id);#}
+                                    href = $newTr.find('.download').attr('href');
+                                    href += data.msg.id;
+                                    $newTr.find('.download').attr('href', href);
                                     $('#rowList').append($newTr);
-
                                     // 清理进度条
                                     $tr.remove();
                                 })
@@ -422,6 +424,7 @@
             });
 
             // 文件下载
+            {% comment %}
             $('.download').click(function (){
                 fid = $(this).attr('fid')
                 $.get('{% url 'web:manage:file_download' request.tracer.project.id %}',
@@ -436,6 +439,7 @@
                         }
                     });
             });
+            {% endcomment %}
         })
     </script>
 {% endblock js %}
