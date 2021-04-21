@@ -11,7 +11,3 @@ def issues(request, project_id):
 
 def statistics(request, project_id):
     return render(request, 'web/statistics.html')
-
-
-def settings(request, project_id):
-    return render(request, 'web/settings.html')

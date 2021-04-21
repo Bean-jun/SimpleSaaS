@@ -102,3 +102,41 @@ def credentials(bucket, region="ap-shanghai"):
     sts = Sts(config)
     response = sts.get_credential()
     return response
+
+
+def delete_bucket(bucket, region):
+    """删除桶"""
+    config = CosConfig(Region=region, SecretId=settings.TENCENT_SECRET_ID, SecretKey=settings.TENCENT_SECRET_KEY)
+    client = CosS3Client(config)
+
+    # 处理桶中的文件
+    while True:
+        # 找到桶中的文件
+        part_objs = client.list_objects(bucket)
+
+        # 查询还有多少文件
+        contents = part_objs.get('Contents')
+        if not contents:
+            break
+        # 批量删除
+        objects = {
+            "Quiet": "true",
+            "Object": [{"Key": item["Key"]} for item in contents]
+        }
+        client.delete_objects(bucket, objects)
+
+    # 处理桶中的碎片
+    while True:
+        # 找到桶中的碎片
+        part_upload = client.list_multipart_uploads(bucket)
+
+        uploads = part_upload.get('Upload')
+
+        if not uploads:
+            break
+
+        for item in uploads:
+            client.abort_multipart_upload(bucket, item['Key'], item['UploadId'])
+
+    # 删除桶
+    client.delete_bucket(bucket)
