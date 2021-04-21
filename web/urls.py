@@ -1,5 +1,5 @@
 from django.urls import path, include
-from web.views import account, home, project, manage, wiki, file
+from web.views import account, home, project, manage, wiki, file, setting
 
 app_name = 'web'
 
@@ -42,7 +42,8 @@ urlpatterns = [
             # path('wiki/detail/', wiki.wiki_detail, name='wiki_detail'),   # 项目wiki详细
 
 
-            path('settings/', manage.settings, name='settings'),   # 项目设置
+            path('settings/', setting.settings, name='settings'),   # 项目设置
+            path('settings/delete/', setting.settings_delete, name='settings_delete'),   # 项目删除
             ], 'manage',), namespace='manage')
          ),   # 项目设置
 
