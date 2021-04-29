@@ -1,5 +1,5 @@
 from django.urls import path, include
-from web.views import account, home, project, manage, wiki, file, setting
+from web.views import account, home, project, manage, wiki, file, setting, issues
 
 app_name = 'web'
 
@@ -22,7 +22,6 @@ urlpatterns = [
     # 项目详细概览 -- 亦可
     path('manage/<int:project_id>/', include(([
             path('dashboard/', manage.dashboard, name='dashboard'),   # 项目概览
-            path('issues/', manage.issues, name='issues'),   # 项目问题
             path('statistics/', manage.statistics, name='statistics'),   # 项目统计
 
             # 文件路由
@@ -41,9 +40,15 @@ urlpatterns = [
             path('wiki/upload_img/', wiki.wiki_upload_img, name='wiki_upload_img'),   # 项目wiki图片上传
             # path('wiki/detail/', wiki.wiki_detail, name='wiki_detail'),   # 项目wiki详细
 
-
+            # 项目设置
             path('settings/', setting.settings, name='settings'),   # 项目设置
             path('settings/delete/', setting.settings_delete, name='settings_delete'),   # 项目删除
+
+            # 项目问题
+            path('issues/', issues.issues, name='issues'),  # 项目问题
+            path('issues/detail/<int:issues_id>/', issues.issues_detail, name='detail'),  # 项目问题详细
+            path('issues/record/<int:issues_id>/', issues.issues_record, name='issues_record'),  # 项目操作记录
+
             ], 'manage',), namespace='manage')
          ),   # 项目设置
 

@@ -14,6 +14,7 @@ class WikiModelForm(BootStrapForm, forms.ModelForm):
         super(WikiModelForm, self).__init__(*args, **kwargs)
         self.request = request
 
+        # todo: 注意对choices的操作
         # 找到需要的字段内容进行数据重置
         total_data_list = [('','请选择'),] # 用于做提示
         data_list = Wiki.objects.filter(project=self.request.tracer.project).values_list('id', 'title')  # 找到当前project的存在标题

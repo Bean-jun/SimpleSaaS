@@ -6,6 +6,7 @@ from django.urls import reverse
 from web import models
 from web.forms.project import ProjectForm
 from utils.tencent.cos import create_bucket
+from web.models import IssuesType
 
 
 def project_list(request):
@@ -60,7 +61,7 @@ def project_list(request):
             # 验证成功： 数据库需要存储项目名，颜色，描述，创建者
 
             # 为创建项目的用户创建桶
-            bucket = f"saas-{request.tracer.user.mobile_phone}-{int(100*time.time())}-1305490799"
+            bucket = f"saas-{request.tracer.user.mobile_phone}-{int(100 * time.time())}-1305490799"
             create_bucket(bucket)
             form.instance.bucket = bucket
             form.instance.region = 'ap-shanghai'
@@ -69,7 +70,15 @@ def project_list(request):
             form.instance.create_user = request.tracer.user
 
             # 创建项目
-            form.save()
+            instance = form.save()
+
+            # 项目初始化问题类型
+            issues_type_obj = []
+            for item in IssuesType.PROJECT_INIT_LIST:
+                issues_type_obj.append(IssuesType(project=instance, title=item))
+
+            # 模型批量添加
+            IssuesType.objects.bulk_create(issues_type_obj)
 
             return JsonResponse({"code": 200, "msg": 'ok'})
 
@@ -77,7 +86,6 @@ def project_list(request):
 
 
 def project_star(request, project_type, project_id):
-
     if project_type == 'user_create':
         # 用户创建项目添加星标
         models.Project.objects.filter(id=project_id, create_user=request.tracer.user).update(star=True)
@@ -90,7 +98,6 @@ def project_star(request, project_type, project_id):
 
 
 def project_unstar(request, project_type, project_id):
-
     if project_type == 'create':
         # 用户创建项目取消星标
         models.Project.objects.filter(id=project_id, create_user=request.tracer.user).update(star=False)
