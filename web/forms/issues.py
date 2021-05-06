@@ -35,7 +35,7 @@ class IssuesModelForm(BootStrapForm, forms.ModelForm):
 
         # 指派和关注者
         total_user_list = [
-            (self.request.tracer.project.create_user, self.request.tracer.project.create_user.username), ]  # 用于做提示
+            (self.request.tracer.project.create_user.id, self.request.tracer.project.create_user.username), ]  # 用于做提示
         project_user_list = ProjectUser.objects.filter(project=self.request.tracer.project).values_list('user_id',
                                                                                                         'user__username')
 

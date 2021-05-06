@@ -48,6 +48,7 @@ urlpatterns = [
             path('issues/', issues.issues, name='issues'),  # 项目问题
             path('issues/detail/<int:issues_id>/', issues.issues_detail, name='detail'),  # 项目问题详细
             path('issues/record/<int:issues_id>/', issues.issues_record, name='issues_record'),  # 项目操作记录
+            path('issues/change/<int:issues_id>/', issues.issues_change, name='issues_change'),  # 项目问题变更
 
             ], 'manage',), namespace='manage')
          ),   # 项目设置

@@ -313,6 +313,8 @@
 
     <script>
         var WIKI_UPLOAD_URL = '{% url 'web:manage:wiki_upload_img' request.tracer.project.id %}';
+        var EDITOR;
+
         $(function () {
             initEditorMd();
             initDatepicker();
@@ -322,6 +324,7 @@
             $('#btnSubmit').click(function () {
                 bindSubmit();
             });
+            bindAddForm();
         });
 
         // 问题评论初始化
@@ -393,7 +396,6 @@
                 dataType: 'JSON'
             }).done(function (data) {
                 if (data.code === 200) {
-                    console.log(data.msg);
                     // 添加节点
                     createRecordNode(data.msg);
                     // 输入的内容清空
@@ -403,6 +405,46 @@
                     $.each(data.msg, function (k, v) {
                         $('#content').next('.error-msg').text(v[0]);
                     })
+                }
+            }).fail(function () {
+                console.log('网络连接错误');
+            })
+        }
+
+        // 处理问题修改事件
+        function bindAddForm() {
+            $('#addForm').find('.form-control').change(function () {
+                var Dict = {name: $(this).attr('name'), value: $(this).val()};
+                if(Dict.name){
+                    postAjaxData(Dict);
+                }
+            });
+        }
+
+        // 处理Markdown保存问题
+        function saveMarkdown() {
+            var Dict = {name: 'desc', value: EDITOR.getValue()};
+            console.log(Dict);
+            postAjaxData(Dict);
+        }
+
+        // 发送问题修改数据
+        function postAjaxData(Dict) {
+            $('#id_' + Dict.name).parent().next('.error-msg').text('');
+            $.ajax({
+                url: '{% url 'web:manage:issues_change' request.tracer.project.id issues_obj.id %}',
+                type: 'POST',
+                header: {
+                    "Content-Type": "application/json;charset=utf-8"
+                },
+                data: JSON.stringify(Dict),
+                dataType: 'JSON'
+            }).done(function (data) {
+                if (data.code === 200) {
+                    // 添加节点
+                    createRecordNode(data.msg);
+                } else {
+                    $('#id_' + Dict.name).parent().next('.error-msg').text(data.msg);
                 }
             }).fail(function () {
                 console.log('网络连接错误');
@@ -422,7 +464,7 @@
         // Markdown编辑器的初始化
         function initEditorMd() {
             {#editor是对应编辑页的ID，path是指Markdown文件的依赖其他文件#}
-            editormd('editor', {
+            EDITOR = editormd('editor', {
                 placeholder: "请输入内容",
                 height: 300,
                 {#emoji: true,#}
@@ -437,7 +479,7 @@
                     return ["bold", "hr", "del", "italic", "quote", "|", "image", "preview", "watch", "fullscreen", "||", "save"]
                 },
                 toolbarCustomIcons: {
-                    save: "<input type='button' value='保 存' class='btn btn-success btn-sm' onclick='saveDesc();' />"
+                    save: "<input type='button' value='保 存' class='btn btn-success btn-sm' onclick='saveMarkdown();' />"
                 },
 
                 // 以预览形式展示
