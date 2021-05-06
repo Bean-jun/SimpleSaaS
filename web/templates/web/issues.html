@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="{% static 'plugin/bootstrap-datepicker/css/bootstrap-datepicker.min.css' %}">
     {#    bootstrap选择框#}
     <link rel="stylesheet" href="{% static 'plugin/bootstrap-select/css/bootstrap-select.min.css' %}">
+
+    {#    select2下拉框#}
+    <link rel="stylesheet" href="{% static 'plugin/select2/css/select2.min.css' %}">
     <style>
         .issues-list .number {
             width: 100px;
@@ -37,6 +40,34 @@
             background-color: #dddddd;
         }
 
+        /* 筛选 */
+        .filter-area .item {
+            margin-bottom: 15px;
+        }
+
+        .filter-area .item .title {
+            padding: 5px 0;
+        }
+
+        .filter-area .item .check-list a {
+            text-decoration: none;
+            display: inline-block;
+            min-width: 65px;
+        }
+
+        .filter-area .item .check-list label {
+            font-weight: 200;
+            font-size: 13px;
+            margin-left: 3px;
+        }
+
+        .filter-area .item .check-list a:hover {
+            font-weight: 300;
+        }
+
+        .filter-area .item .check-list .cell {
+            margin-right: 10px;
+        }
     </style>
 {% endblock css %}
 
@@ -47,8 +78,17 @@
                 <div class="panel-heading">
                     <i class="fa fa-search" aria-hidden="true"></i> 筛选
                 </div>
-                <div class="panel-body">
-                    筛选选项
+                <div class="panel-body filter-area">
+                    <div class="item">
+                        {% for row in filter_list %}
+                            <div class="title">{{ row.title }}</div>
+                            <div class="check-list">
+                                {% for item in row.filter %}
+                                    {{ item }}
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -67,10 +107,12 @@
                         <tr>
                             <td class="number">
                                 <i class="fa fa-circle text-{{ item.priority }}"></i>
-                                <a href="{% url 'web:manage:detail' request.tracer.project.id item.id %}" target="_blank">{% string_just item.id %}</a>
+                                <a href="{% url 'web:manage:detail' request.tracer.project.id item.id %}"
+                                   target="_blank">{% string_just item.id %}</a>
                             </td>
                             <td class="issue">
-                                <div><a href="{% url 'web:manage:detail' request.tracer.project.id item.id %}" target="_blank">{{ item.subject }}</a></div>
+                                <div><a href="{% url 'web:manage:detail' request.tracer.project.id item.id %}"
+                                        target="_blank">{{ item.subject }}</a></div>
                                 <div class="tags">
                                     <span class="type">{{ item.issues_type }}</span>
                                     <span>
@@ -286,11 +328,21 @@
     <script src="{% static 'plugin/bootstrap-select/js/bootstrap-select.min.js' %}"></script>
     <script src="{% static 'plugin/bootstrap-select/js/i18n/defaults-zh_CN.min.js' %}"></script>
 
+    {#    下拉框#}
+    <script src="{% static 'plugin/select2/js/select2.min.js' %}"></script>
+    <script src="{% static 'plugin/select2/js/i18n/zh-CN.js' %}"></script>
+
     <script>
         var WIKI_UPLOAD_URL = '{% url 'web:manage:wiki_upload_img' request.tracer.project.id %}';
         $(function () {
             bindBootStrapShownEvent();
             initDatepicker();
+            initSelect2();
+
+            // 点击筛选checkbox
+            $('.filter-area').find(':checkbox').click(function () {
+                location.href = $(this).parent().attr('href');
+            });
 
             // 问题创建提交
             $('#btnAddSumbit').click(function () {
@@ -312,6 +364,17 @@
                 })
             });
         });
+
+        // 初始化下拉框
+        function initSelect2() {
+            $('.select2').select2({}).on('select2:select', function (e) {
+                // 选中某一项触发
+                location.href = e.params.data.id;
+            }).on('select2:unselect', function (e) {
+                // 移除某一项触发
+                location.href = e.params.data.id;
+            });
+        }
 
         // 初始化时间
         function initDatepicker() {
