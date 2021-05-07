@@ -3,10 +3,13 @@ from django.db import models
 
 class UserInfo(models.Model):
     """用户信息表"""
-    username = models.CharField(max_length=32, verbose_name="用户名", db_index=True)   # db_index 创建索引
+    username = models.CharField(max_length=32, verbose_name="用户名", db_index=True)  # db_index 创建索引
     email = models.EmailField(max_length=32, verbose_name="邮箱")
     mobile_phone = models.CharField(max_length=32, verbose_name="手机号")
     password = models.CharField(max_length=32, verbose_name="密码")
+
+    def __str__(self):
+        return self.username
 
 
 class PricePolicy(models.Model):
@@ -112,3 +115,101 @@ class FileRepository(models.Model):
 
     update_user = models.ForeignKey("UserInfo", on_delete=models.CASCADE, verbose_name="最近更新者")
     modify_datetime = models.DateTimeField(auto_now=True, verbose_name="更新时间")
+
+
+class Module(models.Model):
+    """功能模块"""
+    project = models.ForeignKey("Project", on_delete=models.CASCADE, verbose_name="项目")
+    title = models.CharField(max_length=32, verbose_name='模块名称')
+
+    def __str__(self):
+        return self.title
+
+
+class IssuesType(models.Model):
+    """问题类型（任务，bug, 功能...）"""
+    PROJECT_INIT_LIST = ['任务', '功能', 'bug']  # 项目创建之初创建这三个默认类型
+    project = models.ForeignKey("Project", on_delete=models.CASCADE, verbose_name="项目")
+    title = models.CharField(max_length=32, verbose_name='模块名称')
+
+    def __str__(self):
+        return self.title
+
+
+class Issues(models.Model):
+    """问题"""
+    PRIORITY_CHOICES = (
+        ('danger', '高'),
+        ('warning', '中'),
+        ('success', '低'),
+    )
+    STATUS_CHOICES = (
+        (1, '新建'),
+        (2, '处理中'),
+        (3, '已解决'),
+        (4, '已忽略'),
+        (5, '待反馈'),
+        (6, '已关闭'),
+        (7, '重新打开'),
+    )
+    MODEL_CHOICES = (
+        (1, '公开模式'),
+        (2, '隐蔽模式'),
+    )
+    project = models.ForeignKey("Project", on_delete=models.CASCADE, verbose_name="项目")
+    issues_type = models.ForeignKey("IssuesType", on_delete=models.CASCADE, verbose_name="问题类型")
+    module = models.ForeignKey("Module", on_delete=models.CASCADE, null=True, blank=True, verbose_name="功能模块")
+    subject = models.CharField(max_length=32, verbose_name='主题')
+    desc = models.TextField(verbose_name='问题描述')
+    priority = models.CharField(choices=PRIORITY_CHOICES, max_length=12, default='danger', verbose_name="优先级")
+    status = models.SmallIntegerField(choices=STATUS_CHOICES, verbose_name="状态", default=1)
+    assign = models.ForeignKey("UserInfo", related_name='task', null=True, blank=True, on_delete=models.CASCADE,
+                               verbose_name="指派")
+    attention = models.ManyToManyField('UserInfo', related_name='observe', blank=True, verbose_name="关注者")
+    start_date = models.DateTimeField(null=True, blank=True, verbose_name="开始时间")
+    end_date = models.DateTimeField(null=True, blank=True, verbose_name="结束时间")
+    mode = models.SmallIntegerField(choices=MODEL_CHOICES, verbose_name="模式", default=1)
+    parent = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, verbose_name="父问题",
+                               related_name='child')
+    create_user = models.ForeignKey("UserInfo", related_name='create_user', null=True, blank=True,
+                                    on_delete=models.CASCADE, verbose_name="创建者")
+    create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+    modify_datetime = models.DateTimeField(verbose_name='最后更新时间', auto_now=True)
+
+    def __str__(self):
+        return self.subject
+
+
+class IssuesReply(models.Model):
+    """ 问题回复"""
+    reply_type_choices = (
+        (1, '修改记录'),
+        (2, '回复')
+    )
+    reply_type = models.IntegerField(verbose_name='类型', choices=reply_type_choices)
+
+    issues = models.ForeignKey('Issues', on_delete=models.CASCADE, verbose_name='问题')
+    content = models.TextField(verbose_name='描述')
+    create_user = models.ForeignKey('UserInfo', on_delete=models.CASCADE, verbose_name='创建者',
+                                    related_name='create_reply')
+    create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+
+    reply = models.ForeignKey('IssuesReply', on_delete=models.CASCADE, verbose_name='回复', null=True, blank=True)
+
+
+class ProjectInvite(models.Model):
+    """ 项目邀请码 """
+    PERIOD_CHOICES = (
+        (30, '30分钟'),
+        (60, '1小时'),
+        (300, '5小时'),
+        (1440, '24小时'),
+    )
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, verbose_name='项目')
+    code = models.CharField(verbose_name='邀请码', max_length=64, unique=True)
+    count = models.PositiveIntegerField(verbose_name='限制数量', null=True, blank=True, help_text='空表示无数量限制')
+    use_count = models.PositiveIntegerField(verbose_name='已邀请数量', default=0)
+    period = models.IntegerField(verbose_name='有效期', choices=PERIOD_CHOICES, default=1440)
+    create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+    create_user = models.ForeignKey('UserInfo', on_delete=models.CASCADE, related_name='create_invite',
+                                    verbose_name='创建者', )

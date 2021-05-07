@@ -19,3 +19,9 @@ def file_uid(value):
     """文件名"""
     _uid = "{}666{}".format(str(uuid.uuid4()), value)
     return md5(_uid)
+
+
+def uid(value):
+    """邀请链接"""
+    _uid = "{}-{}".format(str(uuid.uuid4()), value)
+    return md5(_uid)

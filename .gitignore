@@ -8,3 +8,5 @@ __pycache__/
 !*/migrations/__init__.py
 /db.sqlite3
 /web/static/plugin/editor-md/
+/web/static/plugin/bootstrap-select/
+/web/static/plugin/bootstrap-datepicker/
