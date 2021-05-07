@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from web.forms.bootstrap import BootStrapForm
-from web.models import Issues, ProjectUser, IssuesType, Module, IssuesReply
+from web.models import Issues, ProjectUser, IssuesType, Module, IssuesReply, ProjectInvite
 
 
 class IssuesModelForm(BootStrapForm, forms.ModelForm):
@@ -57,3 +57,11 @@ class IssuesReplyModelForm(BootStrapForm, forms.ModelForm):
     class Meta:
         model = IssuesReply
         fields = ['content', 'reply']
+
+
+class InviteModelForm(BootStrapForm, forms.ModelForm):
+    """邀请验证"""
+
+    class Meta:
+        model = ProjectInvite
+        fields = ['period', 'count']

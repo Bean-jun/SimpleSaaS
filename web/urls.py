@@ -49,9 +49,13 @@ urlpatterns = [
             path('issues/detail/<int:issues_id>/', issues.issues_detail, name='detail'),  # 项目问题详细
             path('issues/record/<int:issues_id>/', issues.issues_record, name='issues_record'),  # 项目操作记录
             path('issues/change/<int:issues_id>/', issues.issues_change, name='issues_change'),  # 项目问题变更
+            path('issues/invite/url/', issues.invite_url, name='invite_url'),   # 项目邀请链接
 
             ], 'manage',), namespace='manage')
          ),   # 项目设置
+
+    # 加入项目
+    path('invite/join/<str:code>/', issues.invite_join, name='invite_join'),    # 用户加入项目
 
     # account 账户管理模块相关链接
     path('register/', account.register, name='register'),    # 用户注册
