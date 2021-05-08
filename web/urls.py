@@ -1,10 +1,16 @@
 from django.urls import path, include
-from web.views import account, home, project, manage, wiki, file, setting, issues, dashboard
+from web.views import account, home, project, statistics, wiki, file, setting, issues, dashboard
 
 app_name = 'web'
 
 urlpatterns = [
     path('index/', home.index, name='index'),      # 首页
+
+    # 价格策略
+    path('price/', home.price, name='price'),
+    path('payment/<int:policy_id>/', home.payment, name='payment'),
+    path('pay/', home.pay, name='pay'),
+    path('pay/pay_notify', home.pay_notify, name='pay_notify'),
 
     # 项目管理
     path('project/list/', project.project_list, name='project_list'),   # 项目管理页
@@ -22,7 +28,10 @@ urlpatterns = [
     # 项目详细概览 -- 亦可
     path('manage/<int:project_id>/', include(([
 
-            path('statistics/', manage.statistics, name='statistics'),   # 项目统计
+            path('statistics/', statistics.statistics, name='statistics'),   # 项目统计
+            path('statistics/priority/', statistics.statistics_priority, name='statistics_priority'), # 项目饼图
+            path('statistics/project/user/', statistics.statistics_project_user, name='statistics_project_user'),   # 项目柱状图
+
 
             # 文件路由
             path('file/', file.file, name='file'),   # 项目文件
