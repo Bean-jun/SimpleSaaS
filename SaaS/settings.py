@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
@@ -26,7 +25,6 @@ SECRET_KEY = '%m8)5!p41_7#_84z#@=b*=6j*y$#*a@ba#p_5(t(o27gvi^oc!'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -71,7 +69,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'SaaS.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
@@ -81,7 +78,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -101,20 +97,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-hans'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
-
+USE_TZ = False  # 以TIME_ZONE设置时区为准，处理数据库中时间字段
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
@@ -125,9 +119,8 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
-
 ###### sms短信验证 ######
-TENCENT_APP_ID = 666666 # 自己应用ID
+TENCENT_APP_ID = 666666  # 自己应用ID
 TENCENT_APP_KEY = "66666666"  # 自己应用Key
 TENCENT_SMS_SIGN = "66666"  # 自己腾讯云创建签名时填写的签名内容（使用公众号的话这个值一般是公众号全称或简称）
 
@@ -136,6 +129,10 @@ TEMPLATE_ID = {
     'login': 914045,
     'register': 914010
 }
+
+# 腾讯云对象存储
+TENCENT_SECRET_ID = '用户 secret_id'
+TENCENT_SECRET_KEY = '用户 secret_key'
 
 # CACHE缓存
 CACHES = {
@@ -152,6 +149,22 @@ CACHES = {
     }
 }
 
+# 创建白名单，用户无需登录即可访问
+WHITE_REGEX_URL_LIST = [
+    '/register/',
+    '/login/sms/',
+    '/login/',
+    '/sms/',
+    '/image/code/',
+    '/index/',
+]
+
+# 配置支付宝APPID
+APPID = 'xxxxxxxx'
+
+# 配置网站运行地址
+WEB_ADDRESS = '127.0.0.1'
+WEB_HOST = '8000'
 
 try:
     from local_settings import *
