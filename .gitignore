@@ -10,3 +10,4 @@ __pycache__/
 /web/static/plugin/editor-md/
 /web/static/plugin/bootstrap-select/
 /web/static/plugin/bootstrap-datepicker/
+/utils/Payment/Cryptography/
